@@ -4,7 +4,6 @@ def init_db():
     conn = sqlite3.connect('database.sqlite')
     cursor = conn.cursor()
     
-    # جدول اکانت‌های هتزنر
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS accounts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -13,7 +12,6 @@ def init_db():
         )
     ''')
     
-    # جدول کاربران و کیف پول
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -41,3 +39,21 @@ def get_all_accounts():
     accounts = cursor.fetchall()
     conn.close()
     return accounts
+
+# ----- توابع جدید برای کاربران -----
+def get_user_balance(user_id):
+    conn = sqlite3.connect('database.sqlite')
+    cursor = conn.cursor()
+    cursor.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,))
+    result = cursor.fetchone()
+    
+    # اگر کاربر جدید بود، او را با موجودی صفر در دیتابیس ثبت کن
+    if not result:
+        cursor.execute('INSERT INTO users (user_id, balance) VALUES (?, ?)', (user_id, 0))
+        conn.commit()
+        balance = 0
+    else:
+        balance = result[0]
+        
+    conn.close()
+    return balance
