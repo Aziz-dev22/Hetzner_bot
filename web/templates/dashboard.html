@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>داشبورد مدیریت ZarVPN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="glass-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>داشبورد مدیریت</h2>
+            <a href="/logout" class="glass-btn btn-danger" style="width: auto; padding: 8px 15px;">خروج</a>
+        </div>
+        
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div style="color: #1a4a63; margin-bottom: 15px; background: rgba(255,255,255,0.7); padding: 10px; border-radius: 8px; text-align: center;">
+                {{ messages[0] }}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <hr style="border-color: rgba(255,255,255,0.4);">
+        
+        <!-- بخش دکمه بکاپ دیتابیس -->
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="/backup" class="glass-btn" style="background: #28a745; width: auto; padding: 10px 20px;">💾 تهیه فایل پشتیبان (بکاپ) از دیتابیس</a>
+        </div>
+
+        <h3>افزودن پلن جدید</h3>
+        <p style="text-align: center; font-size: 13px;">سیستم به صورت خودکار ۲۰٪ سود به قیمت پایه اضافه می‌کند.</p>
+        <form method="POST" action="/add_plan" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="text" name="name" class="glass-input" style="flex: 1; min-width: 150px;" placeholder="نام پلن (مثال: Ubuntu 2GB)" required>
+            <input type="number" name="cpu" class="glass-input" style="flex: 1; min-width: 100px;" placeholder="تعداد CPU" required>
+            <input type="number" name="ram" class="glass-input" style="flex: 1; min-width: 100px;" placeholder="مقدار RAM (MB)" required>
+            <input type="number" name="price" class="glass-input" style="flex: 1; min-width: 150px;" placeholder="قیمت پایه (تومان)" required>
+            <button type="submit" class="glass-btn" style="flex: 1; min-width: 150px;">➕ ثبت پلن</button>
+        </form>
+
+        <h3 style="margin-top: 40px;">لیست پلن‌های فعال</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام پلن</th>
+                    <th>CPU / RAM</th>
+                    <th>قیمت نهایی (با سود)</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plan in plans %}
+                <tr>
+                    <td>{{ plan.id }}</td>
+                    <td>{{ plan.name }}</td>
+                    <td>{{ plan.cpu }} Core / {{ plan.ram }} MB</td>
+                    <td>{{ plan.price }} تومان</td>
+                    <td>
+                        <a href="/delete_plan/{{ plan.id }}" class="glass-btn btn-danger" style="padding: 5px 10px; width: auto; text-decoration: none;">حذف</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">هیچ پلنی یافت نشد.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
