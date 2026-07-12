@@ -1,22 +1,7 @@
-from pydantic_settings import BaseSettings
+import os
 
-class Settings(BaseSettings):
-    # تنظیمات ربات
-    BOT_TOKEN: str
-    ADMIN_ID: int
-    
-    # تنظیمات هتزنر
-    HETZNER_API_TOKEN: str
-    
-    # تنظیمات دیتابیس
-    DATABASE_URL: str = "sqlite:///./zarvpn.db"
-    
-    # تنظیمات پنل وب
-    SECRET_KEY: str
-    WEB_ADMIN_USER: str
-    WEB_ADMIN_PASS: str
-    
-    class Config:
-        env_file = ".env"
+class Settings:
+    BOT_TOKEN = "YOUR_BOT_TOKEN_HERE" # در آینده از env خوانده شود
+    ADMIN_ID = 12345678
 
 settings = Settings()
