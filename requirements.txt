@@ -1,7 +1,2 @@
-aiogram==2.25.1
-Flask==2.3.2
-SQLAlchemy==2.0.19
-pydantic-settings==2.0.1
-hcloud==1.25.0
-APScheduler==3.10.1
-python-dotenv==1.0.0
+aiogram==2.25.2
+aiohttp==3.8.6
