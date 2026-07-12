@@ -4,7 +4,7 @@ REPO_URL="https://github.com/Aziz-dev22/hetzner_bot.git"
 REPO_NAME=$(basename "$REPO_URL" .git)
 PROJECT_DIR="$(pwd)/$REPO_NAME"
 
-echo "🟢 در حال نصب/بروزرسانی ربات..."
+echo "🟢 در حال نصب و راه‌اندازی نسخه جدید ربات..."
 
 if [ -d "$PROJECT_DIR" ]; then
     cd "$PROJECT_DIR"
@@ -22,10 +22,11 @@ pip install -r requirements.txt
 if [ ! -f ".env" ]; then
     echo "-----------------------------------"
     read -p "🔑 لطفا توکن ربات تلگرام را وارد کنید: " BOT_TOKEN
-    read -p "👤 لطفا آیدی عددی ادمین را وارد کنید: " ADMIN_ID
+    read -p "👤 لطفا آیدی عددی ادمین را وارد کنید (بدون هیچ حرف اضافه‌ای): " ADMIN_ID
     
-    echo "BOT_TOKEN=$BOT_TOKEN" > .env
-    echo "ADMIN_ID=$ADMIN_ID" >> .env
+    # حذف فاصله‌های احتمالی هنگام ذخیره
+    echo "BOT_TOKEN=${BOT_TOKEN// /}" > .env
+    echo "ADMIN_ID=${ADMIN_ID// /}" >> .env
     echo "✅ اطلاعات ذخیره شد."
 fi
 
