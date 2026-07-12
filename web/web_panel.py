@@ -6,12 +6,12 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
-# استفاده از سکرت کی برای امنیت سشن‌ها
+# استفاده از سکرت کی برای امنیت سشن‌ها (ایجاد شده خودکار در نصب)
 app.secret_key = settings.SECRET_KEY
 
-# نام کاربری و رمز عبور پیش‌فرض ادمین پنل
-ADMIN_USER = "admin"
-ADMIN_PASS = "admin123" # پیشنهاد: در فایل .env تعریف شود
+# دریافت اطلاعات لاگین که کاربر در هنگام اجرای install.sh وارد کرده است
+ADMIN_USER = settings.WEB_ADMIN_USER
+ADMIN_PASS = settings.WEB_ADMIN_PASS
 
 @app.route('/')
 def index():
