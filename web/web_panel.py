@@ -87,7 +87,9 @@ def backup_db():
     if 'logged_in' not in session:
         return redirect(url_for('login'))
         
-    db_path = "zarvpn.db"
+    # مسیر نام جدید دیتابیس
+    db_path = "hetzner_bot.db"
+    
     if not os.path.exists(db_path):
         flash("فایل دیتابیس یافت نشد!")
         return redirect(url_for('dashboard'))
