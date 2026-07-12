@@ -1,12 +1,99 @@
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
 body {
-    background: url('sky_blue_pattern.png'); /* الگوی مورد نظر شما */
-    font-family: Arial, sans-serif;
-}
-.glass-box {
-    background: rgba(255, 255, 255, 0.2); /* افکت semi-transparent */
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin: 0;
+    padding: 0;
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    /* بک‌گراند آبی آسمانی با یک پترن ملایم */
+    background-color: #87CEEB;
+    background-image: radial-gradient(#ffffff 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: #333;
+    direction: rtl;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
+/* کلاس اصلی برای باکس‌های نیمه‌شفاف شیشه‌ای */
+.glass-box {
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.login-box {
+    max-width: 400px;
+    margin-top: 100px;
+    text-align: center;
+}
+
+h1, h2, h3 {
+    color: #1a4a63;
+    text-align: center;
+}
+
+/* استایل فرم‌ها */
+.glass-input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    font-family: 'Vazirmatn', sans-serif;
+    box-sizing: border-box;
+    outline: none;
+}
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* استایل دکمه‌ها */
+.glass-btn {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    background: #1a4a63;
+    color: white;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.glass-btn:hover {
+    background: #25668a;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.btn-danger {
+    background: #d9534f;
+}
+.btn-danger:hover {
+    background: #c9302c;
+}
+
+/* استایل جداول */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+th {
+    background: rgba(255, 255, 255, 0.4);
+    color: #1a4a63;
+}
