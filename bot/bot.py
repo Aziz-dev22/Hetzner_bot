@@ -6,9 +6,10 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=settings.BOT_TOKEN)
 dp = Dispatcher(bot)
 
-# وارد کردن هندلرها پس از تعریف dp
+# این ایمپورت‌ها باعث می‌شوند ربات تمام دکمه‌ها را شناسایی کند
 from bot.handlers import user_handlers
+from bot.handlers import wallet_handlers
+from bot.handlers import referral_handlers
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
-
