@@ -1,4 +1,5 @@
 from flask import Flask, render_template_string, request, redirect
+from database import add_hetzner_account, get_all_accounts
 
 app = Flask(__name__)
 
@@ -31,36 +32,60 @@ HTML_TEMPLATE = """
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
         input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
         button { background-color: #008CBA; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; text-align: right; border-bottom: 1px solid #ddd; }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <h2>⚙️ تنظیمات قیمت‌گذاری و لوکیشن‌ها</h2>
-    <form action="/save" method="POST">
+    <h2>➕ افزودن اکانت هتزنر جدید</h2>
+    <form action="/add_account" method="POST">
         <div class="form-group">
-            <label>قیمت تغییر آی‌پی (تتـر / واحد فرضی):</label>
-            <input type="number" name="ip_price" value="5">
+            <label>نام اکانت (برای شناسایی):</label>
+            <input type="text" name="acc_name" placeholder="مثلا: اکانت اصلی" required>
         </div>
         <div class="form-group">
-            <label>لوکیشن‌های فعال برای فروش:</label>
-            <select name="locations" multiple>
-                <option value="fsn1" selected>فالکنشتاین (fsn1)</option>
-                <option value="nbg1" selected>نورنبرگ (nbg1)</option>
-                <option value="hel1">هلسینکی (hel1)</option>
-            </select>
+            <label>توکن API هتزنر:</label>
+            <input type="password" name="acc_token" required>
         </div>
-        <button type="submit">ذخیره تنظیمات</button>
+        <button type="submit">ثبت اکانت</button>
     </form>
 </div>
+
+<div class="container">
+    <h2>🔗 اکانت‌های متصل شده</h2>
+    <table>
+        <tr>
+            <th>آیدی</th>
+            <th>نام اکانت</th>
+            <th>توکن (مخفی)</th>
+        </tr>
+        {% for acc in accounts %}
+        <tr>
+            <td>{{ acc[0] }}</td>
+            <td>{{ acc[1] }}</td>
+            <td>**************</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" style="text-align:center;">هیچ اکانتی متصل نیست.</td></tr>
+        {% end endfor %}
+    </table>
+</div>
+
 </body>
 </html>
 """
 
 @app.route('/')
 def index():
-    return render_template_string(HTML_TEMPLATE)
+    accounts = get_all_accounts()
+    return render_template_string(HTML_TEMPLATE, accounts=accounts)
 
-@app.route('/save', methods=['POST'])
-def save():
-    # منطق ذخیره تنظیمات
+@app.route('/add_account', methods=['POST'])
+def add_account_route():
+    name = request.form.get('acc_name')
+    token = request.form.get('acc_token')
+    if name and token:
+        add_hetzner_account(name, token)
     return redirect('/')
