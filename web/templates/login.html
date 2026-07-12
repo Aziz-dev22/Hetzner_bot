@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>ورود به مدیریت ZarVPN</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="glass-box login-box">
+        <h2>مدیریت ZarVPN</h2>
+        
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div style="color: #d9534f; margin-bottom: 15px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px;">
+                {{ messages[0] }}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/login">
+            <input type="text" name="username" class="glass-input" placeholder="نام کاربری" required>
+            <input type="password" name="password" class="glass-input" placeholder="رمز عبور" required>
+            <button type="submit" class="glass-btn">ورود به پنل</button>
+        </form>
+    </div>
+
+</body>
+</html>
+
