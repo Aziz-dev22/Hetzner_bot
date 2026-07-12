@@ -5,15 +5,13 @@ from database import get_all_accounts
 
 load_dotenv()
 
-# خواندن یوزر و پسورد از فایل .env
 WEB_USERNAME = os.getenv('WEB_USERNAME', 'admin').strip()
 WEB_PASSWORD = os.getenv('WEB_PASSWORD', 'admin').strip()
 
 app = Flask(__name__)
-# یک کلید امنیتی تصادفی برای رمزنگاری نشست‌ها (Sessions)
-app.secret_key = os.urandom(24)
+# استفاده از کلید ثابت تا با ری‌استارت شدن سرور، سشن شما از بین نرود
+app.secret_key = "hetzner_secure_session_key_2026"
 
-# استایل مشترک آبی آسمانی و نیمه‌شفاف
 COMMON_STYLE = """
 <style>
     body {
@@ -135,8 +133,8 @@ DASHBOARD_TEMPLATE = """
             <td style="color: green;">متصل</td>
         </tr>
         {% else %}
-        <tr><td colspan="3" style="text-align:center;">هیچ اکانتی متصل نیست. (از طریق ربات اضافه کنید)</td></tr>
-        {% end endfor %}
+        <tr><td colspan="3" style="text-align:center;">هیچ اکانتی متصل نیست. (از طریق دکمه‌های شیشه‌ای ربات اضافه کنید)</td></tr>
+        {% endfor %}
     </table>
     
     <a href="/logout" style="text-decoration: none;">
@@ -169,7 +167,6 @@ def logout():
 
 @app.route('/')
 def index():
-    # بررسی لاگین بودن کاربر
     if not session.get('logged_in'):
         return redirect(url_for('login'))
         
@@ -180,5 +177,5 @@ def index():
 def save_settings():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    # منطق ذخیره تنظیمات در دیتابیس
     return redirect(url_for('index'))
+
