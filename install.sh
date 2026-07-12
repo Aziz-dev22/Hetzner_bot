@@ -1,26 +1,53 @@
 #!/bin/bash
 
-# متغیرهای مسیر پروژه
+# رنگ‌ها برای زیباتر شدن محیط ترمینال
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 APP_DIR="/opt/zarvpn_project"
 SERVICE_NAME="zarvpn.service"
+BACKUP_DIR="/root/zarvpn_backups"
 
 function install_project() {
-    echo "Updating system and installing dependencies..."
-    sudo apt update && sudo apt install -y python3-pip python3-venv git curl
+    echo -e "${GREEN}==> شروع فرآیند نصب...${NC}"
 
-    echo "Setting up project directory..."
-    # فرض بر این است که کدها در این مسیر قرار می‌گیرند
-    sudo mkdir -p $APP_DIR
+    # ۱. دریافت اطلاعات از کاربر
+    read -p "Enter Telegram Bot Token: " BOT_TOKEN
+    read -p "Enter Admin Telegram ID (Numeric): " ADMIN_ID
+    read -p "Enter Hetzner API Token: " HETZNER_API_TOKEN
+    read -p "Enter Web Panel Username (برای ورود به پنل وب): " WEB_USER
+    read -p "Enter Web Panel Password (رمز عبور پنل وب): " WEB_PASS
+    read -p "Enter Your GitHub Repository URL (مثال: https://github.com/Aziz-dev22/Zarvpn_bot.git): " REPO_URL
+
+    echo -e "${GREEN}==> در حال آپدیت سیستم و نصب پیش‌نیازها...${NC}"
+    sudo apt update && sudo apt install -y python3-pip python3-venv git curl tar
+
+    echo -e "${GREEN}==> در حال دانلود پروژه از گیت‌هاب...${NC}"
+    sudo rm -rf $APP_DIR
+    git clone $REPO_URL $APP_DIR
     cd $APP_DIR
 
-    echo "Creating virtual environment..."
+    echo -e "${GREEN}==> در حال ساخت فایل تنظیمات امن...${NC}"
+    # تولید یک کلید امنیتی رندوم برای سشن‌های وب
+    SECRET_KEY=$(head -c 32 /dev/urandom | base64)
+    
+    cat <<EOF > $APP_DIR/.env
+BOT_TOKEN=${BOT_TOKEN}
+ADMIN_ID=${ADMIN_ID}
+HETZNER_API_TOKEN=${HETZNER_API_TOKEN}
+DATABASE_URL=sqlite:///./zarvpn.db
+SECRET_KEY=${SECRET_KEY}
+WEB_ADMIN_USER=${WEB_USER}
+WEB_ADMIN_PASS=${WEB_PASS}
+EOF
+
+    echo -e "${GREEN}==> در حال ساخت محیط مجازی و نصب کتابخانه‌های پایتون...${NC}"
     python3 -m venv venv
     source venv/bin/activate
-    
-    # نصب وابستگی‌ها
     pip install -r requirements.txt
 
-    echo "Configuring Systemd service..."
+    echo -e "${GREEN}==> در حال تنظیم سرویس Systemd...${NC}"
     cat <<EOF | sudo tee /etc/systemd/system/${SERVICE_NAME}
 [Unit]
 Description=ZarVPN Telegram Bot and Web Panel
@@ -38,42 +65,73 @@ RestartSec=3
 WantedBy=multi-user.target
 EOF
 
-    echo "Starting services..."
+    echo -e "${GREEN}==> در حال اجرای سرویس‌ها...${NC}"
     sudo systemctl daemon-reload
     sudo systemctl enable ${SERVICE_NAME}
     sudo systemctl start ${SERVICE_NAME}
     
-    echo "Installation complete! The service is now running in the background."
+    echo -e "${GREEN}✅ نصب با موفقیت به پایان رسید! ربات و پنل وب اکنون فعال هستند.${NC}"
 }
 
 function update_code() {
-    echo "Pulling latest code from GitHub..."
-    cd $APP_DIR
-    git pull origin main
-    
-    echo "Restarting ZarVPN service..."
-    sudo systemctl restart ${SERVICE_NAME}
-    echo "Update applied and service restarted successfully."
+    echo -e "${GREEN}==> در حال دریافت کدهای جدید از گیت‌هاب...${NC}"
+    if [ -d "$APP_DIR" ]; then
+        cd $APP_DIR
+        git pull
+        sudo systemctl restart ${SERVICE_NAME}
+        echo -e "${GREEN}✅ آپدیت با موفقیت انجام شد و سرویس ری‌استارت گردید.${NC}"
+    else
+        echo -e "${RED}❌ پوشه پروژه یافت نشد! آیا ربات را نصب کرده‌اید؟${NC}"
+    fi
 }
 
-function show_status() {
-    sudo systemctl status ${SERVICE_NAME}
+function backup_project() {
+    echo -e "${GREEN}==> در حال تهیه فایل پشتیبان از دیتابیس و تنظیمات...${NC}"
+    mkdir -p $BACKUP_DIR
+    DATE=$(date +"%Y%m%d_%H%M%S")
+    if [ -d "$APP_DIR" ]; then
+        tar -czf $BACKUP_DIR/zarvpn_backup_$DATE.tar.gz -C $APP_DIR zarvpn.db .env
+        echo -e "${GREEN}✅ فایل بکاپ در مسیر زیر ذخیره شد:${NC}"
+        echo -e "${GREEN}$BACKUP_DIR/zarvpn_backup_$DATE.tar.gz${NC}"
+    else
+        echo -e "${RED}❌ پوشه پروژه یافت نشد!${NC}"
+    fi
+}
+
+function uninstall_project() {
+    echo -e "${RED}⚠️ هشدار: این عملیات ربات، پنل وب و تمامی دیتابیس‌ها را برای همیشه حذف می‌کند!${NC}"
+    read -p "آیا از حذف کامل مطمئن هستید؟ (y/n): " confirm
+    if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+        echo -e "${GREEN}==> در حال توقف سرویس...${NC}"
+        sudo systemctl stop ${SERVICE_NAME}
+        sudo systemctl disable ${SERVICE_NAME}
+        sudo rm /etc/systemd/system/${SERVICE_NAME}
+        sudo systemctl daemon-reload
+        
+        echo -e "${GREEN}==> در حال حذف فایل‌های پروژه...${NC}"
+        sudo rm -rf $APP_DIR
+        echo -e "${GREEN}✅ ربات ZarVPN به طور کامل از سرور حذف شد.${NC}"
+    else
+        echo "عملیات حذف لغو شد."
+    fi
 }
 
 echo "======================================"
-echo "    ZarVPN Project Manager V1.0       "
+echo "    ZarVPN Project Manager V2.0       "
 echo "======================================"
-echo "1. Install completely (Deps + Systemd)"
-echo "2. Update code from GitHub & Restart"
-echo "3. Check Service Status"
-echo "4. Exit"
+echo "1. نصب کامل ربات (Install)"
+echo "2. آپدیت کدها (Update)"
+echo "3. بکاپ از دیتابیس (Backup)"
+echo "4. حذف کامل ربات (Uninstall)"
+echo "5. خروج (Exit)"
 echo "======================================"
-read -p "Enter your choice (1-4): " choice
+read -p "لطفاً یک گزینه را انتخاب کنید (۱-۵): " choice
 
 case $choice in
     1) install_project ;;
     2) update_code ;;
-    3) show_status ;;
-    4) exit 0 ;;
-    *) echo "Invalid option. Please run the script again." ;;
+    3) backup_project ;;
+    4) uninstall_project ;;
+    5) exit 0 ;;
+    *) echo -e "${RED}❌ گزینه نامعتبر!${NC}" ;;
 esac
