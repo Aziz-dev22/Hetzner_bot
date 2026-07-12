@@ -9,13 +9,12 @@ from database import add_hetzner_account, get_all_accounts
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN', '').strip()
-# تبدیل قطعی آیدی ادمین به رشته و حذف فاصله‌های اضافی
 ADMIN_ID = str(os.getenv('ADMIN_ID', '')).strip()
+SERVER_IP = os.getenv('SERVER_IP', '127.0.0.1').strip()
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
 def is_admin(user_id):
-    # مقایسه ایمن آیدی‌ها به صورت رشته
     return str(user_id).strip() == ADMIN_ID
 
 @bot.message_handler(commands=['start'])
@@ -23,9 +22,9 @@ def send_welcome(message):
     try:
         markup = InlineKeyboardMarkup(row_width=1)
         if is_admin(message.chat.id):
-            # استفاده از دکمه شیشه‌ای برای لینک پنل وب 
+            # جایگذاری خودکار آی‌پی سرور شما در لینک
             markup.add(
-                InlineKeyboardButton("🌐 ورود به پنل مدیریت وب", url="http://YOUR_SERVER_IP:5000"),
+                InlineKeyboardButton("🌐 ورود به پنل مدیریت وب", url=f"http://{SERVER_IP}:5000"),
                 InlineKeyboardButton("➕ افزودن اکانت هتزنر", callback_data="add_account"),
                 InlineKeyboardButton("🖥 مدیریت تمامی سرورها", callback_data="list_servers")
             )
@@ -80,7 +79,6 @@ def list_servers(call):
                 
             for server in servers:
                 markup = InlineKeyboardMarkup(row_width=2)
-                # دکمه‌های مدیریتی برای هر سرور
                 markup.add(
                     InlineKeyboardButton("🟢 روشن", callback_data=f"start_{server.id}"),
                     InlineKeyboardButton("🔴 خاموش", callback_data=f"stop_{server.id}"),
@@ -134,7 +132,6 @@ def handle_server_action(call):
             bot.send_message(call.message.chat.id, f"🔑 پسورد جدید سرور {target_server.name}:\n`{res.root_password}`", parse_mode="Markdown")
             bot.answer_callback_query(call.id, "پسورد ریست شد.")
         elif action == "rebuild":
-            # ریبیلد به اوبونتو 22.04 به صورت پیش‌فرض
             res = target_server.rebuild(image=Image(name="ubuntu-22.04"))
             bot.send_message(call.message.chat.id, f"⚙️ سرور در حال ریبیلد است.\nپسورد جدید:\n`{res.root_password}`", parse_mode="Markdown")
             bot.answer_callback_query(call.id, "ریبیلد آغاز شد.")
@@ -144,3 +141,4 @@ def handle_server_action(call):
             bot.answer_callback_query(call.id, "حذف شد.")
     except Exception as e:
         bot.answer_callback_query(call.id, f"❌ خطا: {str(e)[:20]}")
+
