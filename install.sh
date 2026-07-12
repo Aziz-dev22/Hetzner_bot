@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# رنگ‌ها برای زیباتر شدن محیط ترمینال
+# رنگ‌ها برای خوانایی بهتر در ترمینال
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-APP_DIR="/opt/zarvpn_project"
-SERVICE_NAME="zarvpn.service"
-BACKUP_DIR="/root/zarvpn_backups"
+# مسیرهای دقیق پروژه شما
+APP_DIR="/opt/hetzner_bot"
+SERVICE_NAME="hetzner_bot.service"
+BACKUP_DIR="/root/hetzner_bot_backups"
 
 function install_project() {
     echo -e "${GREEN}==> شروع فرآیند نصب...${NC}"
@@ -18,7 +19,7 @@ function install_project() {
     read -p "Enter Hetzner API Token: " HETZNER_API_TOKEN
     read -p "Enter Web Panel Username (برای ورود به پنل وب): " WEB_USER
     read -p "Enter Web Panel Password (رمز عبور پنل وب): " WEB_PASS
-    read -p "Enter Your GitHub Repository URL (مثال: https://github.com/Aziz-dev22/Zarvpn_bot.git): " REPO_URL
+    read -p "Enter Your GitHub Repository URL (مثال: https://github.com/Aziz-dev22/Hetzner_bot.git): " REPO_URL
 
     echo -e "${GREEN}==> در حال آپدیت سیستم و نصب پیش‌نیازها...${NC}"
     sudo apt update && sudo apt install -y python3-pip python3-venv git curl tar
@@ -36,7 +37,7 @@ function install_project() {
 BOT_TOKEN=${BOT_TOKEN}
 ADMIN_ID=${ADMIN_ID}
 HETZNER_API_TOKEN=${HETZNER_API_TOKEN}
-DATABASE_URL=sqlite:///./zarvpn.db
+DATABASE_URL=sqlite:///./hetzner_bot.db
 SECRET_KEY=${SECRET_KEY}
 WEB_ADMIN_USER=${WEB_USER}
 WEB_ADMIN_PASS=${WEB_PASS}
@@ -50,7 +51,7 @@ EOF
     echo -e "${GREEN}==> در حال تنظیم سرویس Systemd...${NC}"
     cat <<EOF | sudo tee /etc/systemd/system/${SERVICE_NAME}
 [Unit]
-Description=ZarVPN Telegram Bot and Web Panel
+Description=Hetzner Manager Telegram Bot and Web Panel
 After=network.target
 
 [Service]
@@ -90,9 +91,9 @@ function backup_project() {
     mkdir -p $BACKUP_DIR
     DATE=$(date +"%Y%m%d_%H%M%S")
     if [ -d "$APP_DIR" ]; then
-        tar -czf $BACKUP_DIR/zarvpn_backup_$DATE.tar.gz -C $APP_DIR zarvpn.db .env
+        tar -czf $BACKUP_DIR/hetzner_bot_backup_$DATE.tar.gz -C $APP_DIR hetzner_bot.db .env
         echo -e "${GREEN}✅ فایل بکاپ در مسیر زیر ذخیره شد:${NC}"
-        echo -e "${GREEN}$BACKUP_DIR/zarvpn_backup_$DATE.tar.gz${NC}"
+        echo -e "${GREEN}$BACKUP_DIR/hetzner_bot_backup_$DATE.tar.gz${NC}"
     else
         echo -e "${RED}❌ پوشه پروژه یافت نشد!${NC}"
     fi
@@ -110,14 +111,14 @@ function uninstall_project() {
         
         echo -e "${GREEN}==> در حال حذف فایل‌های پروژه...${NC}"
         sudo rm -rf $APP_DIR
-        echo -e "${GREEN}✅ ربات ZarVPN به طور کامل از سرور حذف شد.${NC}"
+        echo -e "${GREEN}✅ پروژه Hetzner Bot به طور کامل از سرور حذف شد.${NC}"
     else
         echo "عملیات حذف لغو شد."
     fi
 }
 
 echo "======================================"
-echo "    ZarVPN Project Manager V2.0       "
+echo "    Hetzner Bot Project Manager V2.0  "
 echo "======================================"
 echo "1. نصب کامل ربات (Install)"
 echo "2. آپدیت کدها (Update)"
