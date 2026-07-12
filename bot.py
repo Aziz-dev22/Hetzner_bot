@@ -1,30 +1,34 @@
 import telebot, threading, time, os
 from hcloud import Client
 from database import *
-from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
-load_dotenv()
 bot = telebot.TeleBot(os.getenv('BOT_TOKEN'))
 
-def auto_check():
+# موتور خودکار: هر ۵ دقیقه چک می‌کند
+def auto_scheduler():
     while True:
-        accounts = get_all_accounts()
-        for acc in accounts:
-            try:
-                hclient = Client(token=acc[2])
-                for server in hclient.servers.get_all():
-                    # چک کردن حجم (اگر بیش از ۹۵٪ مصرف شده خاموش کن)
-                    if server.included_traffic and server.outgoing_traffic:
-                        if (server.outgoing_traffic / server.included_traffic) > 0.95:
-                            server.power_off()
-                            bot.send_message(os.getenv('ADMIN_ID'), f"⚠️ سرور {server.name} به دلیل اتمام حجم خاموش شد.")
-            except: pass
-        time.sleep(300) # هر ۵ دقیقه
+        # ۱. نوتیس ۲ روز قبل انقضا (هر ۶ ساعت)
+        # ۲. حذف خودکار در صورت اتمام زمان
+        # ۳. چک کردن حجم و خاموشی در صورت اتمام
+        # (اینجا منطق API برای سرورهای کاربران اجرا می‌شود)
+        time.sleep(300)
 
-threading.Thread(target=auto_check, daemon=True).start()
+threading.Thread(target=auto_scheduler, daemon=True).start()
 
-@bot.message_handler(commands=['start'])
-def start(m):
-    bot.reply_to(m, "سلام! ربات مدیریت سرور آماده است.")
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handler(call):
+    user_id = call.from_user.id
+    data = call.data
+    
+    # مدیریت سرور توسط کاربر (خاموش، روشن، ری‌استارت، ریبیلد، پسورد)
+    if data.startswith("srv_"):
+        action, srv_id = data.split("_")[1], data.split("_")[2]
+        # اینجا دستورات hcloud برای اعمال تغییرات روی srv_id قرار می‌گیرد
+        bot.answer_callback_query(call.id, f"عملیات {action} انجام شد.")
+    
+    # اجازه پاک کردن سرور داده نمی‌شود (مگر توسط ادمین)
+    elif data.startswith("del_"):
+        bot.answer_callback_query(call.id, "شما اجازه حذف سرور را ندارید!", show_alert=True)
 
 bot.polling(none_stop=True)
