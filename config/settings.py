@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
 
 class Settings(BaseSettings):
     # تنظیمات ربات
@@ -13,10 +12,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./zarvpn.db"
     
     # تنظیمات پنل وب
-    SECRET_KEY: str = "super-secret-key-for-session"
+    SECRET_KEY: str
+    WEB_ADMIN_USER: str
+    WEB_ADMIN_PASS: str
     
     class Config:
         env_file = ".env"
 
 settings = Settings()
-
