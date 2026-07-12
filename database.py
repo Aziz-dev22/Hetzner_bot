@@ -1,59 +1,26 @@
-import sqlite3
+import telebot, threading, time
+from hcloud import Client
+from database import *
+from dotenv import load_dotenv
 
-def init_db():
-    conn = sqlite3.connect('database.sqlite')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS accounts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            token TEXT UNIQUE
-        )
-    ''')
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
-            balance INTEGER DEFAULT 0
-        )
-    ''')
-    conn.commit()
-    conn.close()
+load_dotenv()
+bot = telebot.TeleBot(os.getenv('BOT_TOKEN'))
 
-def add_hetzner_account(name, token):
-    try:
-        conn = sqlite3.connect('database.sqlite')
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO accounts (name, token) VALUES (?, ?)', (name, token))
-        conn.commit()
-        conn.close()
-        return True
-    except sqlite3.IntegrityError:
-        return False
+def auto_check_servers():
+    while True:
+        accounts = get_all_accounts()
+        for acc in accounts:
+            try:
+                hclient = Client(token=acc[2])
+                for server in hclient.servers.get_all():
+                    # چک کردن حجم ترافیک (اگر مصرف به ۹۵٪ رسید خاموش شود)
+                    traffic_used = server.outgoing_traffic
+                    traffic_limit = server.included_traffic
+                    if traffic_used and traffic_limit and (traffic_used / traffic_limit) > 0.95:
+                        server.power_off()
+                        # اینجا می‌توانید نوتیفیکیشن تلگرام هم ارسال کنید
+            except: pass
+        time.sleep(300) # هر ۵ دقیقه
 
-def get_all_accounts():
-    conn = sqlite3.connect('database.sqlite')
-    cursor = conn.cursor()
-    cursor.execute('SELECT id, name, token FROM accounts')
-    accounts = cursor.fetchall()
-    conn.close()
-    return accounts
-
-# ----- توابع جدید برای کاربران -----
-def get_user_balance(user_id):
-    conn = sqlite3.connect('database.sqlite')
-    cursor = conn.cursor()
-    cursor.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,))
-    result = cursor.fetchone()
-    
-    # اگر کاربر جدید بود، او را با موجودی صفر در دیتابیس ثبت کن
-    if not result:
-        cursor.execute('INSERT INTO users (user_id, balance) VALUES (?, ?)', (user_id, 0))
-        conn.commit()
-        balance = 0
-    else:
-        balance = result[0]
-        
-    conn.close()
-    return balance
+threading.Thread(target=auto_check_servers, daemon=True).start()
+bot.polling()
