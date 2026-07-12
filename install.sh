@@ -1,7 +1,6 @@
 #!/bin/bash
 
 REPO_URL="https://github.com/Aziz-dev22/hetzner_bot.git"
-# استخراج خودکار نام مخزن از لینک
 REPO_NAME=$(basename "$REPO_URL" .git)
 PROJECT_DIR="$(pwd)/$REPO_NAME"
 
@@ -24,15 +23,12 @@ if [ ! -f ".env" ]; then
     echo "-----------------------------------"
     read -p "🔑 لطفا توکن ربات تلگرام را وارد کنید: " BOT_TOKEN
     read -p "👤 لطفا آیدی عددی ادمین را وارد کنید: " ADMIN_ID
-    read -p "☁️ لطفا توکن API هتزنر را وارد کنید: " HETZNER_TOKEN
     
     echo "BOT_TOKEN=$BOT_TOKEN" > .env
     echo "ADMIN_ID=$ADMIN_ID" >> .env
-    echo "HETZNER_TOKEN=$HETZNER_TOKEN" >> .env
     echo "✅ اطلاعات ذخیره شد."
 fi
 
-# ساخت سرویس با مسیر داینامیک
 cat <<EOF > /etc/systemd/system/vpn_manager_bot.service
 [Unit]
 Description=Telegram Bot and Web Panel
