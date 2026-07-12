@@ -8,11 +8,12 @@ def run_bot():
     bot.polling(none_stop=True)
 
 def run_web():
-    print("🌐 پنل وب در حال اجراست...")
+    print("🌐 پنل وب روی پورت 5000 در حال اجراست...")
+    # دسترسی از همه آی‌پی‌ها باز است
     app.run(host='0.0.0.0', port=5000, use_reloader=False)
 
 if __name__ == '__main__':
-    # ساخت دیتابیس در صورت نبودن
+    # ساخت دیتابیس و جداول در اولین اجرا
     init_db()
     
     t1 = threading.Thread(target=run_bot)
